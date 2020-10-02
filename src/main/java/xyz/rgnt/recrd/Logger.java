@@ -2,31 +2,33 @@ package xyz.rgnt.recrd;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.graalvm.compiler.graph.Node;
 import org.jetbrains.annotations.NotNull;
 import xyz.rgnt.recrd.callbacks.Callback;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Logger {
 
-    private final @NotNull List<ChatColor> prefixColors = Arrays.asList(ChatColor.YELLOW);
+    private final @NotNull List<ChatColor> prefixColors = new ArrayList<>();
     private @NotNull String prefix;
 
-    private final @NotNull List<ChatColor> delimiterColors = Arrays.asList(ChatColor.DARK_GRAY);
+    private final @NotNull List<ChatColor> delimiterColors = new ArrayList<>();
     private @NotNull String delimiter = " :: ";
 
     private final @NotNull List<Callback> callbacks = new ArrayList<>();
 
     private boolean verbose = true;
 
+    // todo factory
+
+
     /**
      * Logger with set prefix and prefix colors
+     *
      * @param prefix       Prefix
      * @param prefixColors Prefix colors
      */
@@ -37,6 +39,7 @@ public class Logger {
 
     /**
      * Logger with set prefix, prefix colors and delimiter, delimiter colors
+     *
      * @param prefix          Prefix
      * @param prefixColors    Prefix colors
      * @param delimiter       Delimiter
@@ -50,10 +53,11 @@ public class Logger {
 
     /**
      * Sends debug message to console
+     *
      * @param message Message
      */
     public void debug(@NotNull String message) {
-        if(verbose) {
+        if (verbose) {
             send(ChatColor.GRAY, message, true);
             Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onDebug(message)));
         }
@@ -61,16 +65,18 @@ public class Logger {
 
     /**
      * Sends debug message to console with message format
+     *
      * @param message    Message
      * @param formatVars Format
      */
-    public void debug(@NotNull String message, Object ... formatVars) {
+    public void debug(@NotNull String message, Object... formatVars) {
         debug(MessageFormat.format(message, formatVars));
     }
 
 
     /**
      * Sends info message to console
+     *
      * @param message Message
      */
     public void info(@NotNull String message) {
@@ -80,15 +86,17 @@ public class Logger {
 
     /**
      * Sends info message to console with message format
+     *
      * @param message    Message
      * @param formatVars Format
      */
-    public void info(@NotNull String message, Object ... formatVars) {
+    public void info(@NotNull String message, Object... formatVars) {
         info(MessageFormat.format(message, formatVars));
     }
 
     /**
      * Sends error message format to console
+     *
      * @param message Message
      */
     public void error(@NotNull String message) {
@@ -98,6 +106,7 @@ public class Logger {
 
     /**
      * Sends error message to console and traces exception
+     *
      * @param message Message
      * @param x       Exception
      */
@@ -110,25 +119,28 @@ public class Logger {
 
     /**
      * Sends error message to console with message format
+     *
      * @param message    Message
      * @param formatVars Format
      */
-    public void error(@NotNull String message, Object ... formatVars) {
+    public void error(@NotNull String message, Object... formatVars) {
         error(MessageFormat.format(message, formatVars));
     }
 
     /**
      * Sends error message to console with message format and trace
+     *
      * @param message    Message
      * @param x          Exception
      * @param formatVars Format
      */
-    public void error(@NotNull String message, @NotNull Throwable x, Object ... formatVars) {
+    public void error(@NotNull String message, @NotNull Throwable x, Object... formatVars) {
         error(MessageFormat.format(message, formatVars), x);
     }
 
     /**
      * Prints traced Throwable
+     *
      * @param x Throwable to trace
      */
     public void trace(@NotNull Throwable x) {
@@ -145,6 +157,7 @@ public class Logger {
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
+
     /**
      * @return Whether verbose is on or off
      */
@@ -154,6 +167,7 @@ public class Logger {
 
     /**
      * Adds callback
+     *
      * @param callback Callback
      */
     public void addCallback(@NotNull Callback callback) {
