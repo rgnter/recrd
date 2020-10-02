@@ -7,24 +7,32 @@ import xyz.rgnt.recrd.callbacks.Callback;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Logger {
 
-    private final @NotNull List<ChatColor> prefixColors = new ArrayList<>();
+    private final @NotNull List<ChatColor> prefixColors = new ArrayList<ChatColor>() {{
+            add(ChatColor.YELLOW);
+    }};
     private @NotNull String prefix;
 
-    private final @NotNull List<ChatColor> delimiterColors = new ArrayList<>();
+    private final @NotNull List<ChatColor> delimiterColors = new ArrayList<ChatColor>() {{
+            add(ChatColor.GRAY);
+    }};
     private @NotNull String delimiter = " :: ";
 
     private final @NotNull List<Callback> callbacks = new ArrayList<>();
-
     private boolean verbose = true;
 
     // todo factory
 
+    /**
+     * Empty constructor
+     */
+    private Logger() {}
 
     /**
      * Logger with set prefix and prefix colors
@@ -180,5 +188,49 @@ public class Logger {
 
     private @NotNull String applyColors(@NotNull String message, @NotNull List<ChatColor> colors) {
         return colors.stream().map(ChatColor::toString).collect(Collectors.joining()) + message;
+    }
+
+
+    /**
+     * Builder for logger
+     */
+    public static class Builder {
+        
+        private final Logger toBuild = new Logger();
+
+        /**
+         * Empty constructor
+         */
+        private Builder() {}
+
+        public static @NotNull Logger.Builder make() {
+            return new Builder();
+        }
+
+
+        public @NotNull Logger.Builder withPrefix(@NotNull String prefix) {
+            this.toBuild.prefix = prefix;
+            return this;
+        }
+
+        public @NotNull Logger.Builder prefixColors(@NotNull ChatColor ... colors) {
+            this.toBuild.prefixColors.addAll(Arrays.asList(colors));
+            return this;
+        }
+
+        public @NotNull Logger.Builder withDelimiter(@NotNull String delimiter) {
+            this.toBuild.delimiter = delimiter;
+            return this;
+        }
+
+        public @NotNull Logger.Builder delimiterColors(@NotNull ChatColor ... colors) {
+            this.toBuild.delimiterColors.addAll(Arrays.asList(colors));
+            return this;
+        }
+
+        public @NotNull Logger build() {
+            return this.toBuild;
+        }
+
     }
 }
