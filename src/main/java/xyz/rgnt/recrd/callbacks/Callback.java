@@ -16,6 +16,7 @@ public abstract class Callback {
      */
     public abstract void onDebug(@NotNull String formattedMessage);
     public abstract void onInfo(@NotNull String formattedMessage);
+    public abstract void onWarn(@NotNull String formattedMessage);
     public abstract void onError(@NotNull String formattedMessage, @Nullable Throwable exception);
 
 }

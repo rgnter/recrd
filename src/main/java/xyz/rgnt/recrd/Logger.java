@@ -4,6 +4,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import xyz.rgnt.recrd.callbacks.Callback;
+import xyz.rgnt.recrd.timings.TimingsResult;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -12,27 +13,35 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+/**
+ * Logger
+ */
 public class Logger {
 
     private final @NotNull List<ChatColor> prefixColors = new ArrayList<ChatColor>() {{
-            add(ChatColor.YELLOW);
+        add(ChatColor.YELLOW);
     }};
     private @NotNull String prefix;
 
     private final @NotNull List<ChatColor> delimiterColors = new ArrayList<ChatColor>() {{
-            add(ChatColor.GRAY);
+        add(ChatColor.GRAY);
     }};
     private @NotNull String delimiter = " :: ";
 
     private final @NotNull List<Callback> callbacks = new ArrayList<>();
-    private boolean verbose = true;
 
-    // todo factory
+    private boolean verbose = true;
+    private boolean disableCallbacks = false;
+
+    private long timingsStart = 0;
+    private long timingsStop = 0;
+    private long timingsResult = 0;
 
     /**
      * Empty constructor
      */
-    private Logger() {}
+    private Logger() {
+    }
 
     /**
      * Logger with set prefix and prefix colors
@@ -67,7 +76,8 @@ public class Logger {
     public void debug(@NotNull String message) {
         if (verbose) {
             send(ChatColor.GRAY, message, true);
-            Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onDebug(message)));
+            if (!disableCallbacks)
+                Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onDebug(message)));
         }
     }
 
@@ -89,7 +99,8 @@ public class Logger {
      */
     public void info(@NotNull String message) {
         send(ChatColor.WHITE, message, true);
-        Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onInfo(message)));
+        if (!disableCallbacks)
+            Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onInfo(message)));
     }
 
     /**
@@ -103,13 +114,35 @@ public class Logger {
     }
 
     /**
+     * Sends warn message to console
+     *
+     * @param message Message
+     */
+    public void warn(@NotNull String message) {
+        send(ChatColor.YELLOW, message, true);
+        if (!disableCallbacks)
+            Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onWarn(message)));
+    }
+
+    /**
+     * Sends warn message to console with message format
+     *
+     * @param message    Message
+     * @param formatVars Format
+     */
+    public void warn(@NotNull String message, Object... formatVars) {
+        warn(MessageFormat.format(message, formatVars));
+    }
+
+    /**
      * Sends error message format to console
      *
      * @param message Message
      */
     public void error(@NotNull String message) {
         send(ChatColor.RED, message, true);
-        Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onError(message, null)));
+        if (!disableCallbacks)
+            Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onError(message, null)));
     }
 
     /**
@@ -122,7 +155,8 @@ public class Logger {
         send(ChatColor.RED, message, true);
         send(ChatColor.RED, x.toString(), false);
         trace(x);
-        Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onError(message, x)));
+        if (!disableCallbacks)
+            Executors.newSingleThreadExecutor().submit(() -> this.callbacks.forEach(callback -> callback.onError(message, x)));
     }
 
     /**
@@ -160,6 +194,25 @@ public class Logger {
     }
 
     /**
+     * Starts timings.
+     */
+    public void startTimings() {
+        this.timingsStart = System.nanoTime();
+    }
+
+    /**
+     * Stops timings.
+     *
+     * @return Nano difference between start and stop.
+     */
+    public @NotNull TimingsResult stopTimings() {
+        this.timingsStop = System.nanoTime();
+        this.timingsResult = this.timingsStop - this.timingsStart;
+        return new TimingsResult(this.timingsResult);
+    }
+
+
+    /**
      * @param verbose True to enable verbose, False to disable verbose
      */
     public void setVerbose(boolean verbose) {
@@ -171,6 +224,20 @@ public class Logger {
      */
     public boolean isVerbose() {
         return this.verbose;
+    }
+
+    /**
+     * @param disableCallbacks True to disable callbacks, false to enable callbacks
+     */
+    public void setDisableCallbacks(boolean disableCallbacks) {
+        this.disableCallbacks = disableCallbacks;
+    }
+
+    /**
+     * @return Whether callback are disabled or not
+     */
+    public boolean areCallbacksDisabled() {
+        return this.disableCallbacks;
     }
 
     /**
@@ -195,13 +262,14 @@ public class Logger {
      * Builder for logger
      */
     public static class Builder {
-        
+
         private final Logger toBuild = new Logger();
 
         /**
          * Empty constructor
          */
-        private Builder() {}
+        private Builder() {
+        }
 
         public static @NotNull Logger.Builder make() {
             return new Builder();
@@ -213,7 +281,7 @@ public class Logger {
             return this;
         }
 
-        public @NotNull Logger.Builder prefixColors(@NotNull ChatColor ... colors) {
+        public @NotNull Logger.Builder prefixColors(@NotNull ChatColor... colors) {
             this.toBuild.prefixColors.addAll(Arrays.asList(colors));
             return this;
         }
@@ -223,7 +291,7 @@ public class Logger {
             return this;
         }
 
-        public @NotNull Logger.Builder delimiterColors(@NotNull ChatColor ... colors) {
+        public @NotNull Logger.Builder delimiterColors(@NotNull ChatColor... colors) {
             this.toBuild.delimiterColors.addAll(Arrays.asList(colors));
             return this;
         }
