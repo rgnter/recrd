@@ -19,7 +19,7 @@ Dependency:
 <dependency>
   <groupId>xyz.rgnt</groupId>
   <artifactId>recrd</artifactId>
-  <version>1.0-alpha</version>
+  <version>1.0-release</version>
 </dependency>
 ```
 
