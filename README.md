@@ -1,7 +1,7 @@
 # ReCrd
 *// record //*
 
-Logger library for Spigot(or anything based on SpigotAPI - PaperMC, SSSpigot).
+Colorful logger library for Spigot(or anything based on SpigotAPI - PaperMC, SSSpigot).
 
 # For devs
 This project is compiled via [Apache Maven](https://maven.apache.org/) (For more info see **Compiling**). 
